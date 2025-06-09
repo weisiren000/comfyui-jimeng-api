@@ -325,7 +325,7 @@ comfyui-jimeng-api/
 
 ## 许可证
 
-MIT License
+GPL License
 
 ## 贡献
 
