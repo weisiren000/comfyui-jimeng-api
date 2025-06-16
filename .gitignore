@@ -1,3 +1,6 @@
 tests/
 __pycache__/
 **/__pycache__/
+**/*.tar.xz
+*.tar.xz
+TDLink/source.tar.xz
