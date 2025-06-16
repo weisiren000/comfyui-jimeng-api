@@ -67,3 +67,49 @@ def onReceiveOSC(dat, rowIndex, message, address, args, bytes, timeTag):
 - 确保 ComfyUI 和 TouchDesigner 在同一台机器上，或正确配置网络连接
 - 文件路径必须是 TouchDesigner 可以访问的路径
 - 建议使用固定文件名 + 覆盖模式，避免路径变化
+
+## Audio Reload Script
+```python
+# 使用手动传输控制，保证绝对兼容
+
+song_list_dat = op('song_list')
+audio_player_op = op('audio_player')
+
+def onReceiveOSC(dat, rowIndex, message, address, args, bytes, timeTag):
+    if message.startswith('/comfy/done'):
+        
+        parts = message.split()
+        
+        if len(parts) > 1:
+            mood_key = parts[-1].strip('"')
+            print(f"✅ Key '{mood_key}' successfully parsed. Looking it up...")
+
+            found_rows_list = song_list_dat.row(mood_key)
+            
+            if found_rows_list:
+                actual_row = found_rows_list[0]
+                song_path_cell = song_list_dat[actual_row, 'song_path']
+                
+                if song_path_cell is not None:
+                    song_path = song_path_cell.val
+                    print(f"✅✅✅ SUCCESS! Match found! Playing: {song_path}")
+                    
+                    # ---【最终、最可靠的重播逻辑】---
+                    # 1. 设置要播放的新文件路径
+                    audio_player_op.par.file = song_path
+                    
+                    # 2. 停止播放（以防万一它正在播放）
+                    audio_player_op.par.play = 0
+                    
+                    # 3. 将播放头（Cue Point）移动到歌曲的最开始（0）
+                    audio_player_op.par.cue = 0
+                    
+                    # 4. 重新开始播放
+                    audio_player_op.par.play = 1
+                    
+                else:
+                    print(f"⚠️ ERROR: Row found, but 'song_path' column might be missing.")
+            else:
+                print(f"⚠️ LOOKUP FAILED: Key '{mood_key}' was not found in the table.")
+    return
+```
