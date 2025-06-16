@@ -15,14 +15,7 @@ comfyui-jimeng-api/
 │   ├── __init__.py            # 工具导出
 │   ├── image_utils.py         # 图像处理工具
 │   └── file_utils.py          # 文件操作工具
-├── tests/                      # 测试文件
-│   ├── __init__.py            # 测试模块
-│   ├── test_file_saver.py     # 文件保存测试
-│   ├── test_node_definition.py # 节点定义测试
-│   └── workflows/             # 测试工作流
 ├── TDLink/                     # TouchDesigner集成
-│   ├── README.md              # TouchDesigner集成教程
-│   └── How2Link.png           # 连接示意图
 ├── config.example.json        # 配置示例
 ├── requirements.txt           # 依赖列表
 └── README.md                  # 项目文档

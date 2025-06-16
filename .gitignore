@@ -4,3 +4,4 @@ __pycache__/
 **/*.tar.xz
 *.tar.xz
 TDLink/source.tar.xz
+tmp_rovodev_fix_git.ps1
