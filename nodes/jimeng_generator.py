@@ -30,8 +30,8 @@ class JimengImageGenerator:
                     "default": "",
                     "multiline": False
                 }),
-                "model": (["doubao-seedream-3-0-t2i-250415"], {
-                    "default": "doubao-seedream-3-0-t2i-250415"
+                "model": (["doubao-seedream-4-0-250828"], {
+                    "default": "doubao-seedream-4-0-250828"
                 }),
                 "size": ([
                     "1024x1024",  # 1:1
@@ -42,8 +42,10 @@ class JimengImageGenerator:
                     "832x1248",   # 2:3
                     "1248x832",   # 3:2
                     "1512x648",   # 21:9
+                    "4096x4096",  # 1:1
+                    "2048x2048",  # 1:1
                 ], {
-                    "default": "1024x1024"
+                    "default": "2048x2048"
                 }),
                 "watermark": ("BOOLEAN", {
                     "default": False,
