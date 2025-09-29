@@ -9,7 +9,7 @@ comfyui-jimeng-api/
 ├── __init__.py                 # 主入口文件
 ├── nodes/                      # 节点模块
 │   ├── __init__.py            # 节点注册
-│   ├── jimeng_generator.py    # 即梦图像生成节点
+│   ├── jimeng_generator.py    # 即梦图像生成节点 (v0.0.2 支持 Seedream 4.0)
 │   └── file_saver.py          # 文件保存节点
 ├── utils/                      # 工具模块
 │   ├── __init__.py            # 工具导出
@@ -39,22 +39,33 @@ comfyui-jimeng-api/
 
 ### 2. 配置节点
 
-#### 即梦图像生成节点
+#### 即梦图像生成节点 (Seedream 4.0 支持)
+
 在 ComfyUI 中添加 "即梦图像生成" 节点，配置以下参数：
 
 **必需参数:**
-- **prompt**: 图像生成提示词
+- **prompt**: 图像生成提示词，支持中英文（建议不超过300汉字或600英文单词）
 - **api_key**: 火山引擎 API Key
-- **model**: 模型选择 (默认: doubao-seedream-3-0-t2i-250415)
-- **size**: 图像尺寸 (支持多种比例)
-- **watermark**: 是否添加水印
+- **model**: 模型选择 (默认: doubao-seedream-4-0-250828，支持4.0文生图、多图融合、组图)
+- **size**: 图像尺寸 (支持1K/2K/4K或像素值，如2048x2048，总像素[1280x720,4096x4096]，宽高比[1/16,16])
+- **watermark**: 是否添加水印 (默认: true，右下角"AI生成"标识)
 
 **可选参数:**
-- **seed**: 随机种子 (-1为随机)
-- **guidance_scale**: 引导强度 (1.0-10.0)
-- **response_format**: 响应格式 (b64_json/url)
+- **image**: 参考图像，支持单图或多图输入（最多10张，jpeg/png <=10MB，像素<=6000x6000），用于4.0多图融合/编辑
+- **sequential_image_generation**: 组图控制 (auto: 自动生成组图最多15张；disabled: 单图，默认disabled)
+- **max_images**: 组图最大图片数量 (1-15，仅auto模式生效，输入图+输出<=15)
+- **stream**: 流式输出 (true: 即时返回每张图；false: 等待全部生成，默认false)
+- **response_format**: 响应格式 (url: 下载链接24小时有效；b64_json: base64数据，默认url)
+
+**4.0新功能亮点:**
+- **多图融合**: 输入2-10张参考图+prompt，生成单图或组图（内容关联）
+- **组图输出**: auto模式下根据prompt自动生成最多15张关联图片
+- **4K超高清**: 支持4K分辨率 (size=4K或4096x4096)，提升图像质量
+- **流式输出**: stream=true实时返回结果，适合交互场景
+- **中文优化**: 提升中文prompt准确率和多样性
 
 #### 文件保存节点 (增强版)
+
 在 ComfyUI 中添加 "文件保存器" 节点，配置以下参数：
 
 **必需参数:**
@@ -78,12 +89,12 @@ comfyui-jimeng-api/
 
 #### 命名模式说明
 
-**前缀模式 (prefix_mode)**:
+**前缀模式 (prefix_mode):**
 - 使用传统的 `前缀 + 时间戳 + 索引` 命名方式
 - 示例: `image_20250609_143022.png`
 - 适用于批量生成和版本管理
 
-**自定义文件名模式 (custom_name)**:
+**自定义文件名模式 (custom_name):**
 - 使用指定的文件名，忽略前缀和时间戳设置
 - 示例: `my_artwork.png`
 - 适用于需要特定文件名的场景
@@ -91,11 +102,11 @@ comfyui-jimeng-api/
 
 #### 覆盖控制
 
-**允许覆盖 (allow_overwrite=true)**:
+**允许覆盖 (allow_overwrite=true):**
 - 如果文件已存在，直接覆盖
 - 适用于需要固定文件名的场景 (如 `latest.png`)
 
-**防止覆盖 (allow_overwrite=false)**:
+**防止覆盖 (allow_overwrite=false):**
 - 如果文件已存在，自动添加数字后缀
 - 示例: `image.png` → `image_001.png`
 - 确保不会丢失已有文件
@@ -104,17 +115,17 @@ comfyui-jimeng-api/
 
 **OSC (Open Sound Control)** 是一种网络通信协议，常用于音频/视频软件之间的实时通信。
 
-**启用OSC (enable_osc=true)**:
+**启用OSC (enable_osc=true):**
 - 文件保存完成后自动发送OSC消息
 - 可通知其他应用程序处理完成
 
-**OSC配置参数**:
+**OSC配置参数:**
 - **osc_ip**: 接收端IP地址 (127.0.0.1=本机, 192.168.1.100=局域网)
 - **osc_port**: 接收端端口号 (1-65535)
 - **osc_address**: 消息地址路径 (如 /comfy/done)
 - **osc_message**: 自定义消息内容 (留空则发送文件路径)
 
-**常见应用场景**:
+**常见应用场景:**
 - **TouchDesigner**: 触发视觉效果 ([集成教程](TDLink/README.md))
 - **Max/MSP**: 音频处理触发
 - **Ableton Live**: 音乐制作集成
@@ -134,14 +145,17 @@ comfyui-jimeng-api/
 
 ## 注意事项
 
-1. **API 配额**: 请注意火山引擎的 API 调用配额和计费
+1. **API 配额**: 请注意火山引擎的 API 调用配额和计费 (按生成图片张数和token计费)
 2. **网络连接**: 确保 ComfyUI 可以访问互联网
 3. **密钥安全**: 不要在工作流文件中硬编码 API 密钥
-4. **错误处理**: 如果 API 调用失败，节点会返回红色错误图像
+4. **错误处理**: 如果 API 调用失败，节点会返回红色错误图像，检查控制台日志
+5. **4.0限制**: 多图输入最多10张，总输出+输入<=15张；图片格式jpeg/png，大小<=10MB
+6. **链接有效期**: url格式返回的下载链接24小时内有效，请及时保存
 
-## 支持的模型
+## 版本历史
 
-- doubao-seedream-3-0-t2i-250415 (默认)
+- **v0.0.2** (2025-09-29)：集成Seedream 4.0，支持多图融合、组图输出、4K分辨率、流式输出等新功能
+- **v0.0.1**：初始版本，支持Seedream 3.0基本文生图
 
 ## 故障排除
 
@@ -155,11 +169,11 @@ comfyui-jimeng-api/
    **解决方案**:
    - 重启ComfyUI以加载最新的节点定义
    - 检查工作流中的参数值是否正确
-   - 确保使用的是v1.2.1或更高版本
+   - 确保使用的是v0.0.2或更高版本
 
 2. **API 密钥错误**
    - 检查 API Key 是否正确
-   - 确认已开通相应的模型服务
+   - 确认已开通火山方舟大模型服务
 
 3. **网络连接问题**
    - 检查网络连接
@@ -167,7 +181,8 @@ comfyui-jimeng-api/
 
 4. **图像生成失败**
    - 检查提示词是否符合内容政策
-   - 尝试调整生成参数
+   - 尝试调整生成参数 (如size、stream)
+   - 对于4.0组图，检查max_images设置
 
 5. **文件保存失败**
    - 检查保存路径的权限
@@ -186,8 +201,7 @@ comfyui-jimeng-api/
 
 ### 调试信息
 
-插件会在 ComfyUI 控制台输出详细的错误信息，请查看控制台日志进行故障排除。
-
+插件会在 ComfyUI 控制台输出详细的错误信息和API响应（如usage token消耗），请查看控制台日志进行故障排除。
 
 ## 许可证
 
@@ -201,4 +215,6 @@ GPL License
 
 - [火山引擎官网](https://www.volcengine.com/)
 - [火山方舟大模型服务](https://www.volcengine.com/product/ark)
+- [Seedream 4.0 API 文档](https://www.volcengine.com/docs/82379/1541523)
 - [ComfyUI 官网](https://github.com/comfyanonymous/ComfyUI)
+- [GitHub 仓库](https://github.com/weisiren000/comfyui-jimeng-api) (v0.0.2 已发布)
