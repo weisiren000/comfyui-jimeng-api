@@ -110,8 +110,8 @@ class FileSaverBase:
             }
         }
     
-    RETURN_TYPES = ("STRING", "STRING")
-    RETURN_NAMES = ("saved_path", "filename")
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "saved_path", "filename")
     FUNCTION = "save_images"
     CATEGORY = "即梦 API"
     OUTPUT_NODE = True
@@ -311,18 +311,18 @@ class FileSaverBase:
                 if not osc_success:
                     print("⚠️  OSC消息发送失败，但文件保存成功")
 
-            # 返回结果
+            # 返回结果 (包含图像用于预览)
             if len(saved_paths) == 1:
-                return (saved_paths[0], filenames[0])
+                return (images, saved_paths[0], filenames[0])
             else:
                 paths_str = "\n".join(saved_paths)
                 names_str = "\n".join(filenames)
-                return (paths_str, names_str)
+                return (images, paths_str, names_str)
 
         except Exception as e:
             error_msg = f"保存文件失败: {str(e)}"
             print(f"❌ {error_msg}")
-            return (error_msg, "error")
+            return (images, error_msg, "error")
 
 
 # ============= 新版独立节点 =============
@@ -395,8 +395,8 @@ class FileSaverPrefix(FileSaverBase):
             }
         }
     
-    RETURN_TYPES = ("STRING", "STRING")
-    RETURN_NAMES = ("saved_path", "filename")
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "saved_path", "filename")
     FUNCTION = "save_images"
     CATEGORY = "即梦 API/文件保存"
     OUTPUT_NODE = True
@@ -492,8 +492,8 @@ class FileSaverCustom(FileSaverBase):
             }
         }
     
-    RETURN_TYPES = ("STRING", "STRING")
-    RETURN_NAMES = ("saved_path", "filename")
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "saved_path", "filename")
     FUNCTION = "save_images"
     CATEGORY = "即梦 API/文件保存"
     OUTPUT_NODE = True
