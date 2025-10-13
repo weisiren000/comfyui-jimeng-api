@@ -18,8 +18,8 @@ except ImportError:
     print("⚠️  pythonosc未安装，OSC功能将不可用。安装命令: pip install python-osc")
 
 
-class FileSaver:
-    """文件保存节点"""
+class FileSaverBase:
+    """文件保存节点基类 - 共享方法"""
     
     def __init__(self):
         pass
@@ -323,3 +323,208 @@ class FileSaver:
             error_msg = f"保存文件失败: {str(e)}"
             print(f"❌ {error_msg}")
             return (error_msg, "error")
+
+
+# ============= 新版独立节点 =============
+
+class FileSaverPrefix(FileSaverBase):
+    """文件保存节点 - 前缀模式 (推荐)"""
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "save_path": ("STRING", {
+                    "default": "output/images",
+                    "multiline": False
+                }),
+                "filename_prefix": ("STRING", {
+                    "default": "image",
+                    "multiline": False
+                }),
+                "file_format": (["png", "jpg", "jpeg", "webp"], {
+                    "default": "png"
+                }),
+                "quality": ("INT", {
+                    "default": 95,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                }),
+            },
+            "optional": {
+                "add_timestamp": ("BOOLEAN", {
+                    "default": True,
+                    "label_on": "添加时间戳",
+                    "label_off": "不添加时间戳"
+                }),
+                "allow_overwrite": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "允许覆盖",
+                    "label_off": "防止覆盖"
+                }),
+                "create_subfolder": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "按日期创建子文件夹",
+                    "label_off": "直接保存"
+                }),
+                "enable_osc": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "启用OSC发送",
+                    "label_off": "禁用OSC发送"
+                }),
+                "osc_ip": ("STRING", {
+                    "default": "127.0.0.1",
+                    "multiline": False
+                }),
+                "osc_port": ("INT", {
+                    "default": 8189,
+                    "min": 1,
+                    "max": 65535,
+                    "step": 1
+                }),
+                "osc_address": ("STRING", {
+                    "default": "/comfy/done",
+                    "multiline": False
+                }),
+                "osc_message": ("STRING", {
+                    "default": "",
+                    "multiline": False
+                }),
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("saved_path", "filename")
+    FUNCTION = "save_images"
+    CATEGORY = "即梦 API/文件保存"
+    OUTPUT_NODE = True
+    
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        return float("NaN")
+    
+    def save_images(self, images, save_path, filename_prefix, file_format, quality, 
+                   add_timestamp=True, allow_overwrite=False, create_subfolder=False,
+                   enable_osc=False, osc_ip="127.0.0.1", osc_port=8189, 
+                   osc_address="/comfy/done", osc_message=""):
+        """保存图像 - 前缀模式"""
+        return super().save_images(
+            images=images,
+            save_path=save_path,
+            file_format=file_format,
+            quality=quality,
+            naming_mode="prefix_mode",
+            filename_prefix=filename_prefix,
+            custom_filename="",
+            allow_overwrite=allow_overwrite,
+            add_timestamp=add_timestamp,
+            create_subfolder=create_subfolder,
+            enable_osc=enable_osc,
+            osc_ip=osc_ip,
+            osc_port=osc_port,
+            osc_address=osc_address,
+            osc_message=osc_message
+        )
+
+
+class FileSaverCustom(FileSaverBase):
+    """文件保存节点 - 自定义文件名"""
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "save_path": ("STRING", {
+                    "default": "output/images",
+                    "multiline": False
+                }),
+                "custom_filename": ("STRING", {
+                    "default": "output",
+                    "multiline": False
+                }),
+                "file_format": (["png", "jpg", "jpeg", "webp"], {
+                    "default": "png"
+                }),
+                "quality": ("INT", {
+                    "default": 95,
+                    "min": 1,
+                    "max": 100,
+                    "step": 1
+                }),
+            },
+            "optional": {
+                "allow_overwrite": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "允许覆盖",
+                    "label_off": "防止覆盖"
+                }),
+                "create_subfolder": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "按日期创建子文件夹",
+                    "label_off": "直接保存"
+                }),
+                "enable_osc": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "启用OSC发送",
+                    "label_off": "禁用OSC发送"
+                }),
+                "osc_ip": ("STRING", {
+                    "default": "127.0.0.1",
+                    "multiline": False
+                }),
+                "osc_port": ("INT", {
+                    "default": 8189,
+                    "min": 1,
+                    "max": 65535,
+                    "step": 1
+                }),
+                "osc_address": ("STRING", {
+                    "default": "/comfy/done",
+                    "multiline": False
+                }),
+                "osc_message": ("STRING", {
+                    "default": "",
+                    "multiline": False
+                }),
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("saved_path", "filename")
+    FUNCTION = "save_images"
+    CATEGORY = "即梦 API/文件保存"
+    OUTPUT_NODE = True
+    
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        return float("NaN")
+    
+    def save_images(self, images, save_path, custom_filename, file_format, quality,
+                   allow_overwrite=False, create_subfolder=False,
+                   enable_osc=False, osc_ip="127.0.0.1", osc_port=8189,
+                   osc_address="/comfy/done", osc_message=""):
+        """保存图像 - 自定义文件名"""
+        return super().save_images(
+            images=images,
+            save_path=save_path,
+            file_format=file_format,
+            quality=quality,
+            naming_mode="custom_name",
+            filename_prefix="image",
+            custom_filename=custom_filename,
+            allow_overwrite=allow_overwrite,
+            add_timestamp=False,
+            create_subfolder=create_subfolder,
+            enable_osc=enable_osc,
+            osc_ip=osc_ip,
+            osc_port=osc_port,
+            osc_address=osc_address,
+            osc_message=osc_message
+        )
+
+
+# 向后兼容: FileSaver 别名指向 FileSaverPrefix
+FileSaver = FileSaverPrefix

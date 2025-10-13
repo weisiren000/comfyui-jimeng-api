@@ -4,22 +4,28 @@ ComfyUI 即梦 API 节点模块
 """
 
 from .jimeng_generator import JimengImageGenerator
-from .file_saver import FileSaver
+from .file_saver import FileSaver, FileSaverPrefix, FileSaverCustom
 
 # 导出所有节点类
 __all__ = [
     'JimengImageGenerator',
-    'FileSaver'
+    'FileSaver',
+    'FileSaverPrefix',
+    'FileSaverCustom'
 ]
 
 # 节点类映射
 NODE_CLASS_MAPPINGS = {
     "JimengImageGenerator": JimengImageGenerator,
-    "FileSaver": FileSaver
+    "FileSaver": FileSaver,  # 保留旧版本兼容性
+    "FileSaverPrefix": FileSaverPrefix,
+    "FileSaverCustom": FileSaverCustom
 }
 
 # 节点显示名称映射
 NODE_DISPLAY_NAME_MAPPINGS = {
     "JimengImageGenerator": "即梦图像生成",
-    "FileSaver": "文件保存器"
+    "FileSaver": "文件保存器 (旧版)",
+    "FileSaverPrefix": "文件保存器 - 前缀模式",
+    "FileSaverCustom": "文件保存器 - 自定义文件名"
 }
