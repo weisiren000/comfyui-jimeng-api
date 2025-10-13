@@ -53,7 +53,9 @@ def onReceiveOSC(dat, rowIndex, message, address, args, bytes, timeTag):
 
 ## 连接示意图
 
-![如何链接](How2Link.png)
+![连接示意图1](How2Link1.png)
+
+![连接示意图2](How2Link2.png)
 
 ## 工作原理
 
@@ -64,9 +66,69 @@ def onReceiveOSC(dat, rowIndex, message, address, args, bytes, timeTag):
 
 ## 注意事项
 
-- 确保 ComfyUI 和 TouchDesigner 在同一台机器上，或正确配置网络连接
+- 确保 ComfyUI 和 TouchDesigner 在同一台机器上,或正确配置网络连接
 - 文件路径必须是 TouchDesigner 可以访问的路径
-- 建议使用固定文件名 + 覆盖模式，避免路径变化
+- 建议使用固定文件名 + 覆盖模式,避免路径变化
+
+---
+
+## 快速配置指南 (照着抄作业)
+
+### ComfyUI 端配置
+
+> **提示**: 将 `path` 改为你实际的输出路径,建议使用固定文件名以便 TouchDesigner 追踪
+
+### TouchDesigner 端配置
+
+#### 步骤 1: 创建 OSC In DAT
+1. 在 TouchDesigner 中按 `Tab` 键,搜索 `oscin`
+2. 添加 **OSC In DAT** 节点
+3. 在参数面板设置：
+   - **Network Port**: `8189`
+   - **Network Address**: `127.0.0.1`
+
+#### 步骤 2: 添加回调脚本
+1. 选中 OSC In DAT 节点
+2. 点击右侧参数面板的 **Callbacks** 标签
+3. 在 **DAT Execute** 中选择或创建一个 **DAT Execute** 节点
+4. 将以下代码粘贴到 **DAT Execute** 的文本编辑器中：
+
+```python
+def onReceiveOSC(dat, rowIndex, message, address, args, bytes, timeTag):
+    if address.startswith(b'/comfy/done'):
+        # 修改这里的节点名称为你的实际节点
+        target_op = op('moviefilein1')
+        
+        if target_op:
+            correct_file_path = target_op.par.file.eval()
+            safe_file_path = repr(correct_file_path)
+            
+            unload_command = "op('" + target_op.path + "').par.file = ''"
+            reload_command = "op('" + target_op.path + "').par.file = " + safe_file_path
+            
+            print(" 重新加载文件...")
+            
+            run(unload_command, delayFrames=1)
+            run(reload_command, delayFrames=5)
+        else:
+            print(" 错误: 找不到目标节点")
+    return
+```
+
+#### 步骤 3: 设置文件输入节点
+1. 添加 **Movie File In TOP** 节点 (或其他文件输入节点)
+2. 将节点命名为 `moviefilein1` (或修改脚本中的名称)
+3. 设置 **File** 参数为 ComfyUI 的输出路径,例如：
+   ```
+   D:/ComfyUI/output/output_00001.png
+   ```
+
+### 测试连接
+1. 在 ComfyUI 中运行一个工作流
+2. 观察 TouchDesigner 的 **Textport** (Alt+T),应该看到 " 重新加载文件..." 消息
+3. 图像应该自动更新
+
+---
 
 ## Audio Reload Script
 ```python

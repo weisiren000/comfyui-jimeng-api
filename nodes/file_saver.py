@@ -33,10 +33,6 @@ class FileSaver:
                     "default": "output/images",
                     "multiline": False
                 }),
-                "filename_prefix": ("STRING", {
-                    "default": "image",
-                    "multiline": False
-                }),
                 "file_format": (["png", "jpg", "jpeg", "webp"], {
                     "default": "png"
                 }),
@@ -46,30 +42,44 @@ class FileSaver:
                     "max": 100,
                     "step": 1
                 }),
-            },
-            "optional": {
                 "naming_mode": (["prefix_mode", "custom_name"], {
                     "default": "prefix_mode"
                 }),
-                "custom_filename": ("STRING", {
-                    "default": "",
-                    "multiline": False
-                }),
-                "allow_overwrite": ("BOOLEAN", {
-                    "default": False,
-                    "label_on": "允许覆盖",
-                    "label_off": "防止覆盖"
+            },
+            "optional": {
+                # === 前缀模式参数 (naming_mode=prefix_mode时使用) ===
+                "filename_prefix": ("STRING", {
+                    "default": "image",
+                    "multiline": False,
+                    "tooltip": "仅在naming_mode=prefix_mode时生效"
                 }),
                 "add_timestamp": ("BOOLEAN", {
                     "default": True,
                     "label_on": "添加时间戳",
-                    "label_off": "不添加时间戳"
+                    "label_off": "不添加时间戳",
+                    "tooltip": "仅在naming_mode=prefix_mode时生效"
+                }),
+                
+                # === 自定义文件名参数 (naming_mode=custom_name时使用) ===
+                "custom_filename": ("STRING", {
+                    "default": "",
+                    "multiline": False,
+                    "tooltip": "仅在naming_mode=custom_name时生效,留空则使用prefix模式"
+                }),
+                
+                # === 通用参数 ===
+                "allow_overwrite": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "允许覆盖",
+                    "label_off": "防止覆盖"
                 }),
                 "create_subfolder": ("BOOLEAN", {
                     "default": False,
                     "label_on": "按日期创建子文件夹",
                     "label_off": "直接保存"
                 }),
+                
+                # === OSC参数 ===
                 "enable_osc": ("BOOLEAN", {
                     "default": False,
                     "label_on": "启用OSC发送",
@@ -77,21 +87,25 @@ class FileSaver:
                 }),
                 "osc_ip": ("STRING", {
                     "default": "127.0.0.1",
-                    "multiline": False
+                    "multiline": False,
+                    "tooltip": "仅在enable_osc=true时生效"
                 }),
                 "osc_port": ("INT", {
                     "default": 8189,
                     "min": 1,
                     "max": 65535,
-                    "step": 1
+                    "step": 1,
+                    "tooltip": "仅在enable_osc=true时生效"
                 }),
                 "osc_address": ("STRING", {
                     "default": "/comfy/done",
-                    "multiline": False
+                    "multiline": False,
+                    "tooltip": "仅在enable_osc=true时生效"
                 }),
                 "osc_message": ("STRING", {
                     "default": "",
-                    "multiline": False
+                    "multiline": False,
+                    "tooltip": "仅在enable_osc=true时生效,留空则发送文件路径"
                 }),
             }
         }
@@ -227,7 +241,7 @@ class FileSaver:
             print(f"❌ OSC发送失败: {str(e)}")
             return False
 
-    def save_images(self, images, save_path, filename_prefix, file_format, quality, naming_mode="prefix_mode", custom_filename="", allow_overwrite=False, add_timestamp=True, create_subfolder=False, enable_osc=False, osc_ip="127.0.0.1", osc_port=8189, osc_address="/comfy/done", osc_message=""):
+    def save_images(self, images, save_path, file_format, quality, naming_mode="prefix_mode", filename_prefix="image", custom_filename="", allow_overwrite=False, add_timestamp=True, create_subfolder=False, enable_osc=False, osc_ip="127.0.0.1", osc_port=8189, osc_address="/comfy/done", osc_message=""):
         """保存图像到指定位置"""
         
         try:
