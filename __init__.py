@@ -12,7 +12,7 @@ from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 
 # 版本信息
 __version__ = "1.1.0"
-__author__ = "ComfyUI Jimeng API Team"
+__author__ = "Chen Xuanyi"
 
 # 导出节点映射
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
